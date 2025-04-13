@@ -1,0 +1,63 @@
+import http from '@/utils/request'
+
+export interface ${ClassName} {
+#foreach($column in $columns)
+#if(!$column.isSuperColumn())
+  #if($column.javaField=="Int") #set($type="number") #else #set($type="string") #end
+  ${column.javaField}:${type}
+#end
+#end
+}
+
+#if($table.crud)
+export interface ${QueryReqClassName} extends PageParam {
+#elseif($table.tree)
+export interface ${QueryReqClassName} {
+#end
+#foreach($column in $columns)
+#if($column.query)
+  #if($column.javaField=="Int") #set($type="number") #else #set($type="string") #end
+  ${column.javaField}:${type}
+#end
+#end
+}
+#if($pkColumn.javaField=="Int")
+  #set($type="number")
+#else
+  #set($type="string")
+#end
+
+// query ${functionName} detail
+export const query${BusinessName} = (${pkColumn.javaField}: ${type}): Promise<ResponseResult<${ClassName}>> => {
+  return http.get('/${moduleName}/${businessName}/${className}/query', { ${pkColumn.javaField} })
+}
+#if($table.crud)
+// query ${functionName} page
+export const query${BusinessName}Page = (params: ${QueryReqClassName}): Promise<ResponseResult<PageResult<${ClassName}>>> => {
+  return http.get('/${moduleName}/${businessName}/${className}/query-page', params)
+}
+#elseif($table.tree)
+// query ${functionName} list
+export const query${BusinessName}List = (params: ${QueryReqClassName}): Promise<ResponseResult<PageResult<${ClassName}>>> => {
+  return http.get('/${moduleName}/${businessName}/${className}/query-list', params)
+}
+#end
+
+// update ${functionName}
+export const update${ClassName} = (req: ${ClassName}) => {
+  return http.post('/${moduleName}/${businessName}/${className}/update', req)
+}
+// create ${functionName}
+export const create${BusinessName} = (req: ${ClassName}) => {
+  return http.put('/${moduleName}/${businessName}/${className}/create', req)
+}
+
+// remove ${functionName}
+export const delete${BusinessName} = (${pkColumn.javaField}s:${type}[]) => {
+  return http.delete('/${moduleName}/${businessName}/${className}/remove', { ${pkColumn.javaField}s })
+}
+
+// export ${functionName}
+export const export${BusinessName} = (params: ${QueryReqClassName}) => {
+  return http.download('/${moduleName}/${businessName}/${className}/export', params)
+}
