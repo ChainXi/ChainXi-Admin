@@ -1,0 +1,64 @@
+package ${packageName}.domain.${businessName};
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.alibaba.excel.annotation.ExcelProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import com.chainxi.common.web.pojo.BaseDo;
+import java.io.Serial;
+
+/**
+ * ${functionName}对象 ${tableName}
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+
+@TableName(value = "${tableName}")
+public class ${ClassName} extends BaseDo
+{
+    @Serial
+    private static final long serialVersionUID = -1L;
+
+#foreach ($column in $columns)
+#if(!$column.isSuperColumn())
+    /** $column.columnComment */
+#if($column.list)
+    @ExcelProperty("${column.columnComment}")
+#end
+#if($column.pk)
+    @TableId
+#end
+    private $column.javaType $column.javaField;
+
+#end
+#end
+
+#foreach ($column in $columns)
+#if(!$column.isSuperColumn())
+#set($AttrName=$column.capJavaField)
+    public void set${AttrName}($column.javaType $column.javaField) 
+    {
+        this.$column.javaField = $column.javaField;
+    }
+
+    public $column.javaType get${AttrName}() 
+    {
+        return $column.javaField;
+    }
+#end
+#end
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
+#foreach ($column in $columns)
+#set($AttrName=$column.capJavaField)
+            .append("${column.javaField}", get${AttrName}())
+#end
+            .toString();
+    }
+}

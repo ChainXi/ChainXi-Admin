@@ -1,0 +1,4 @@
+com.chainxi.common.web.config.WebMvcConfig
+com.chainxi.common.web.config.RedisConfig
+com.chainxi.common.web.config.MybatisPlusAutoConfiguration
+com.chainxi.common.web.config.RedissonCustomerAutoConfiguration
