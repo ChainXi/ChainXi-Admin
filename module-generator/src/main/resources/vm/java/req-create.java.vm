@@ -1,0 +1,42 @@
+package ${packageName}.reqvo.${businessName};
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import com.chainxi.common.web.pojo.PageParam;
+
+import java.io.Serial;
+
+/**
+ * ${functionName}对象 ${tableName}
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+public class ${ClassName}CreateReqVo
+{
+    @Serial
+    private static final long serialVersionUID = -1L;
+
+#foreach ($column in $columns)
+#if($column.insert)
+    /** $column.columnComment */
+    private $column.javaType $column.javaField;
+#end
+#end
+#foreach ($column in $columns)
+#if($column.insert)
+#set($AttrName=$column.capJavaField)
+    public void set${AttrName}($column.javaType $column.javaField) 
+    {
+        this.$column.javaField = $column.javaField;
+    }
+
+    public $column.javaType get${AttrName}() 
+    {
+        return $column.javaField;
+    }
+#end
+#end
+
+}
