@@ -1,0 +1,12 @@
+-- 菜单 SQL
+INSERT INTO sys_menu (pid, root_id, name, router_path, component_path, icon, keep_alive, status, type)
+VALUES (${parentMenuId}, 0, 'menu.${businessName}', '/${businessName}', '/${moduleName}/${businessName}', '#', true, '0', 1);
+
+-- 按钮父菜单ID
+SELECT @parentId := LAST_INSERT_ID();
+
+-- 按钮 SQL
+INSERT INTO sys_menu (pid, root_id, name, status, type) VALUES (@parentId, 0, '${moduleName}:${businessName}:create', '0', 2);
+INSERT INTO sys_menu (pid, root_id, name, status, type) VALUES (@parentId, 0, '${moduleName}:${businessName}:update', '0', 2);
+INSERT INTO sys_menu (pid, root_id, name, status, type) VALUES (@parentId, 0, '${moduleName}:${businessName}:remove', '0', 2);
+INSERT INTO sys_menu (pid, root_id, name, status, type) VALUES (@parentId, 0, '${moduleName}:${businessName}:export', '0', 2);

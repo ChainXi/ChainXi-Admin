@@ -1,0 +1,11 @@
+otel:
+  metric:
+    export:
+      interval: 1000
+  metrics:
+    exemplar:
+      filter: ALWAYS_ON
+  exporter:
+    otlp:
+      protocol: grpc
+      endpoint: http://otel-collector:4317

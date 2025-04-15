@@ -1,0 +1,70 @@
+package ${packageName}.service.${businessName};
+
+import com.chainxi.common.web.pojo.PageResult;
+import ${packageName}.domain.${businessName}.${ClassName};
+import ${packageName}.reqvo.${businessName}.${QueryReqClassName};
+import ${packageName}.reqvo.${businessName}.${ClassName}CreateReqVo;
+import ${packageName}.reqvo.${businessName}.${ClassName}UpdateReqVo;
+import java.util.List;
+
+/**
+ * ${functionName}Service接口
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+public interface I${ClassName}Service 
+{
+    /**
+     * 查询${functionName}
+     * 
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return ${functionName}
+     */
+    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField});
+
+    /**
+     * 查询${functionName}列表
+     * 
+     * @param reqVo ${functionName}
+     * @return ${functionName}集合
+     */
+    #if($table.crud)
+    public PageResult<${ClassName}> select${ClassName}Page(${QueryReqClassName} reqVo);
+    #elseif($table.tree)
+    public List<${ClassName}> select${ClassName}List(${QueryReqClassName} reqVo);
+    #end
+
+
+    /**
+     * 新增${functionName}
+     * 
+     * @param reqVo ${functionName}
+     * @return 结果
+     */
+    public int create${ClassName}(${ClassName}CreateReqVo reqVo);
+
+    /**
+     * 修改${functionName}
+     * 
+     * @param reqVo ${functionName}
+     * @return 结果
+     */
+    public int update${ClassName}(${ClassName}UpdateReqVo reqVo);
+
+    /**
+     * 批量删除${functionName}
+     * 
+     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键集合
+     * @return 结果
+     */
+    public int delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s);
+
+    /**
+     * 删除${functionName}信息
+     * 
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return 结果
+     */
+    public int delete${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField});
+}
