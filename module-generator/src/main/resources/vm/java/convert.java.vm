@@ -1,0 +1,25 @@
+package ${packageName}.convert.${businessName};
+
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+import ${packageName}.domain.${businessName}.${ClassName};
+import ${packageName}.reqvo.${businessName}.${ClassName}CreateReqVo;
+import ${packageName}.reqvo.${businessName}.${ClassName}UpdateReqVo;
+
+import java.io.Serial;
+
+/**
+ * ${ClassName} Object Converter
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Mapper
+public interface ${ClassName}Convert
+{
+    ${ClassName}Convert INSTANCE = Mappers.getMapper(${ClassName}Convert.class);
+
+    ${ClassName} convert2Do(${ClassName}CreateReqVo reqVo);
+    ${ClassName} convert2Do(${ClassName}UpdateReqVo reqVo);
+
+}
