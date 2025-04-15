@@ -1,0 +1,63 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: system
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/lylloan?hikariPool-my-pool&useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    druid:
+      stat-view-servlet:
+        login-username: admin
+        login-password: admin
+        enabled: true
+        reset-enable: false
+      web-stat-filter: #配置web监控
+        enabled: true
+        url-pattern: /*
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+      filter:
+        stat: #sql监控
+          slow-sql-millis: 1000
+          log-slow-sql: true
+          enabled: true
+        wall: #配置sql防火墙
+          enabled: true
+          config:
+            drop-table-allow: false
+            select-all-column-allow: false
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:root}
+server:
+  port: 8080
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+chainxi:
+  oss:
+    #https://blog.csdn.net/weixin_39723655/article/details/111516208
+    accessKey: ${OSS_ACCESS_KEY}
+    secret: ${OSS_SECRET}
+    endpoint: sts.cn-shenzhen.aliyuncs.com
+    bucketName: chainxi
+  sys:
+    user-init-password: admin123
+  security:
+    urls: #安全路径白名单
+      - /favicon.ico
+      - /*/*.html
+      - /*/*.css
+      - /*/*.js
+      - /swagger-ui/*
+      - /swagger-resources/*
+      - /v3/api-docs/*
+      - /druid/*
+      - /actuator/*
+    captcha:
+      type: math
+      enabled: true
