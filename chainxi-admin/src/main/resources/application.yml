@@ -1,0 +1,70 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: system
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_HOST:jdbc:mysql://mysql:3306/chainxi_admin?hikariPool-my-pool&useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    druid:
+      stat-view-servlet:
+        login-username: ${DRUID_HOST:admin}
+        login-password: ${DRUID_PASSWORD:admin}
+        enabled: true
+        reset-enable: false
+      web-stat-filter: #配置web监控
+        enabled: true
+        url-pattern: /*
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+      filter:
+        stat: #sql监控
+          slow-sql-millis: 1000
+          log-slow-sql: true
+          enabled: true
+        wall: #配置sql防火墙
+          enabled: true
+          config:
+            drop-table-allow: false
+            select-all-column-allow: false
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:root}
+server:
+  port: 8080
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+chainxi:
+  oss:
+    #https://blog.csdn.net/weixin_39723655/article/details/111516208
+    accessKey: ${OSS_ACCESS_KEY}
+    secret: ${OSS_SECRET}
+    endpoint: ${OSS_ENDPOINT:sts.cn-shenzhen.aliyuncs.com}
+    bucketName: ${OSS_BUCKET_NAME:chainxi}
+  sso:
+    auth-url: admin
+  sys:
+    user-init-password: admin123
+  security:
+    urls: #安全路径白名单
+      - /favicon.ico
+      - /doc.html
+      - /webjars/**
+      - /swagger-ui/**
+      - /swagger-resources/**
+      - /v3/api-docs/**
+      - /druid/**
+      - /actuator/**
+    captcha:
+      type: math
+      enabled: true
+knife4j:
+  enable: true
+  basic:
+    enable: true
+    username: ${DOC_USERNAME:admin}
+    password: ${DOC_PASSWORD:admin}

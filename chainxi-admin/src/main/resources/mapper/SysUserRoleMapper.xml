@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chainxi.system.mapper.user.SysUserRoleMapper">
+    <sql id="Base_Column_List">
+        SELECT ur.id,ur.user_id,ur.role_id
+    </sql>
+
+    <sql id="Role_Base_Column_List">
+        SELECT r.id,
+            r.name,
+            r.status,
+            r.remark
+    </sql>
+
+    <select id="getRoleIdsByUserId" resultType="java.lang.Long">
+        SELECT role_id FROM sys_user_role ur WHERE user_id = #{userId}
+    </select>
+
+
+    <select id="getRolesByUserId" resultType="com.chainxi.system.entity.role.SysRoleDo">
+        <include refid="Role_Base_Column_List"/>
+        FROM sys_user_role ur
+        LEFT JOIN sys_role r ON r.id=ur.role_id
+        WHERE ur.user_id=#{userId}
+    </select>
+</mapper>

@@ -1,0 +1,156 @@
+<template>
+  <Dialog v-model="dialogVisible" :title="saveType?$t('action.update'):$t('action.create')" width="800">
+    <el-form ref="formRef" v-loading="formLoading" :model="modelValue" :rules="formRules" label-width="auto">
+      #foreach($column in $columns)
+        #if($column.insert || $column.edit)
+          #if(!$column.insert)
+            #set($condition=" v-if='!saveType'")
+          #elseif(!$column.edit)
+            #set($condition=" v-if='saveType'")
+          #else
+            #set($condition="")
+          #end
+          #set($field=$column.javaField)
+          #set($comment=$column.columnComment)
+          #set($dictType=$column.dictType)
+          #if($column.htmlType == "input")
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-input v-model="modelValue.${field}" placeholder="请输入${comment}" />
+            </el-form-item>
+          #elseif($column.htmlType == "imageUpload")
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <image-upload v-model="modelValue.${field}"/>
+            </el-form-item>
+          #elseif($column.htmlType == "fileUpload")
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <file-upload v-model="modelValue.${field}"/>
+            </el-form-item>
+          #elseif($column.htmlType == "editor")
+            <el-form-item${condition} label="${comment}">
+              <editor v-model="modelValue.${field}" :min-height="192"/>
+            </el-form-item>
+          #elseif($column.htmlType == "select" && "" != $dictType)
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-select v-model="modelValue.${field}" placeholder="请选择${comment}" clearable>
+                <el-option
+                        v-for="dict in getIntDictOptions(${dictType})"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="dict.value"
+                />
+              </el-select>
+            </el-form-item>
+          #elseif($column.htmlType == "radio" && "" != $dictType)
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-radio-group v-model="form.${field}">
+                <el-radio
+                        v-for="dict in getIntDictOptions(${dictType})"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="dict.value"/>
+              </el-radio-group>
+            </el-form-item>
+          #elseif($column.htmlType == "checkbox" && "" != $dictType)
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-checkbox-group v-model="modelValue.${field}">
+                <el-checkbox
+                        v-for="dict in getIntDictOptions(${dictType})"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="dict.value"/>
+              </el-checkbox-group>
+            </el-form-item>
+          #elseif($column.htmlType == "datetime")
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-date-picker clearable
+                              v-model="modelValue.${field}"
+                              type="date"
+                              value-format="yyyy-MM-dd"
+                              placeholder="请选择${comment}">
+              </el-date-picker>
+            </el-form-item>
+          #elseif($column.htmlType == "textarea")
+            <el-form-item${condition} label="${comment}" prop="${field}">
+              <el-input v-model="modelValue.${field}" type="textarea" placeholder="请输入内容" />
+            </el-form-item>
+          #end
+        #end
+      #end
+    </el-form>
+    <template #footer>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">{{ $t('common.ok') }}</el-button>
+      <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
+    </template>
+  </Dialog>
+</template>
+<script lang="ts" setup>
+import * as ${BusinessName}Api from '@/api/${moduleName}/${businessName}'
+defineOptions({ name: '${BusinessName}FormSave' })
+const { t } = useI18n()
+const message = useMessage()
+
+const dialogVisible = ref<boolean>(false)
+const saveType = ref<boolean>(true)
+const formLoading = ref<boolean>(false)
+const formRef = useTemplateRef('formRef')
+
+const defaultData: ${BusinessName}Api.${ClassName} = {
+  #foreach($column in $columns)
+    #if($column.insert || $column.edit)
+      ${column.javaField}:null,
+    #end
+  #end
+}
+
+const modelValue = ref(cloneDeep(defaultData))
+const formRules = reactive({
+  #foreach($column in $columns)
+    #if($column.insert || $column.edit)
+      ${column.javaField}:[{ required: true, message: t('common.nonNull'), trigger: 'blur' }],
+    #end
+  #end
+})
+#if($column.javaField=="Int") #set($type="number") #else #set($type="string") #end
+const open = async (${pkColumn.javaField}: ${type} | null) => {
+  dialogVisible.value = true
+  resetForm()
+  // 修改时，设置数据
+  if (${pkColumn.javaField}!=null) {
+    saveType.value = true
+    try {
+      formLoading.value = true
+      modelValue.value = (await ${BusinessName}Api.query${BusinessName}(${pkColumn.javaField})).data
+    } finally {
+      formLoading.value = false
+    }
+  } else {
+    saveType.value = false
+  }
+}
+defineExpose({ open })
+const emit = defineEmits(['success'])
+const submitForm = async () => {
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  formLoading.value = true
+  try {
+    const data = modelValue.value as ${BusinessName}Api.${ClassName}
+    if (modelValue.value.id==null) {
+      await ${BusinessName}Api.create${BusinessName}(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await ${BusinessName}Api.update${BusinessName}(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+const resetForm = () => {
+  modelValue.value = cloneDeep(defaultData)
+}
+</script>
