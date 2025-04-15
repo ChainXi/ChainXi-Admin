@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    druid:
+      stat-view-servlet:
+        allow:
