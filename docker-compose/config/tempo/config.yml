@@ -1,0 +1,61 @@
+# 开启HTTP数据流以配合grafana
+stream_over_http_enabled: true
+
+## 对外服务接口配置
+server:
+  http_listen_port: 3200
+  #  grpc_listen_port: 9095
+  log_level: info
+
+## 数据来源配置
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "tempo:4317"
+        http:
+          endpoint: "tempo:4318"
+
+## 查询接口性能配置
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09 # 1.073741824 GB（约 1 GB）
+  trace_by_id:
+    duration_slo: 5s
+
+## 数据压缩相关
+compactor:
+  compaction:
+    block_retention: 720h # 配置存储中的数据保留时间 24h*30=720h
+    max_block_bytes: 1.073741824e+10 # 限制为10GB
+
+## 生成trace相关指标并推送至prometheus
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  traces_storage:
+    path: /var/tempo/generator/traces
+
+## 存储相关
+storage:
+  trace:
+    backend: local
+    wal: # Write-Ahead Log 可以理解为在保存至目标存储前的临时存储
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+## 启用Metrics Generator配置
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]
+      generate_native_histograms: both
