@@ -1,0 +1,174 @@
+<template>
+  <ContentWrap v-show="showSearch">
+    <!-- {{ $t('common.query') }}工作栏 -->
+    <el-form @submit.native.prevent class="-mb-15px" :model="viewModel.dataForm" ref="queryFormRef" :inline="true">
+#foreach($column in $columns)
+#if($column.query)
+#set($dictType=$column.dictType)
+#set($AttrName=$column.javaField.substring(0,1).toUpperCase() + ${column.javaField.substring(1)})
+#set($comment=$column.columnComment)
+#if($column.htmlType == "input")
+      <el-form-item label="${comment}" prop="${column.javaField}">
+        <el-input
+                v-model="viewModel.dataForm.${column.javaField}"
+                placeholder="请输入${comment}"
+                clearable
+                @keyup.enter="handleSearchQuery"
+        />
+      </el-form-item>
+#elseif(($column.htmlType == "select" || $column.htmlType == "radio") && "" != $dictType)
+      <el-form-item label="${comment}" prop="${column.javaField}">
+        <el-select v-model="viewModel.dataForm.${column.javaField}" placeholder="请选择${comment}" clearable>
+          <el-option
+                  v-for="dict in getIntDictOptions(${dictType})"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+#elseif($column.htmlType == "datetime" && $column.queryType != "BETWEEN")
+      <el-form-item label="${comment}" prop="${column.javaField}">
+        <el-date-picker clearable
+                        v-model="viewModel.dataForm.${column.javaField}"
+                        type="date"
+                        value-format="yyyy-MM-dd"
+                        placeholder="请选择${comment}">
+        </el-date-picker>
+      </el-form-item>
+#elseif($column.htmlType == "datetime" && $column.queryType == "BETWEEN")
+      <el-form-item label="${comment}" prop="${column.javaField}">
+        <el-date-picker
+                v-model="viewModel.dataForm.${column.javaField}"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                type="datetimerange"
+                :start-placeholder="$t('common.startDate')"
+                :end-placeholder="$t('common.startDate')"
+        ></el-date-picker>
+      </el-form-item>
+#end
+#end
+#end
+      <el-form-item>
+        <el-button @click="handleSearchQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          {{ $t('common.query') }}
+        </el-button>
+        <el-button @click="handleResetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          {{ $t('common.reset') }}
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-row>
+      <el-col :span="12">
+        <el-button v-if="$hasPermission('${moduleName}:${businessName}:add')" plain type="primary" @click="openForm(undefined)">
+          <Icon class="mr-5px" icon="ep:plus" />
+          {{ $t('action.create') }}
+        </el-button>
+        <el-button type="primary" @click="toggleExpandAll">{{ $t('common.expandOrCollapse') }}</el-button>
+      </el-col>
+      <el-col :span="12">
+        <right-toolbar
+          v-model:show-search="showSearch"
+          @refresh="handleQuery()"
+          :columns="(columnControllerRef?.controller as TagSwitch[])"
+        />
+      </el-col>
+    </el-row>
+    <el-table v-if="refreshTable" v-loading="viewModel.queryLoading" row-key="${treeCode}" :data="dataTree" :default-expand-all="collapse" border>
+      <tag-controller ref="columnControllerRef">
+        #foreach($column in $columns)
+          #set($javaField=$column.javaField)
+          #set($comment=$column.columnComment)
+          #if($column.pk)
+            <el-table-column label="${comment}" align="center" prop="${javaField}" />
+          #elseif($column.list && $column.htmlType == "datetime")
+            <el-table-column label="${comment}" align="center" :formatter="dateFormatter" prop="${javaField}" width="180"/>
+          #elseif($column.list && $column.htmlType == "imageUpload")
+            <el-table-column label="${comment}" align="center" prop="${javaField}" width="100">
+              <template slot-scope="scope">
+                <el-image style="width: 100px; height: 100px" :src="scope.row.${javaField}" :fit="fit" />
+              </template>
+            </el-table-column>
+          #elseif($column.list && "" != $column.dictType)
+            <el-table-column label="${comment}" align="center" prop="${javaField}">
+              <template slot-scope="scope">
+                #if($column.htmlType == "checkbox")
+                  <dict-tag :options="${column.dictType}" :value="scope.row.${javaField} ? scope.row.${javaField}.split(',') : []"/>
+                #else
+                  <dict-tag :options="${column.dictType}" :value="scope.row.${javaField}"/>
+                #end
+              </template>
+            </el-table-column>
+          #elseif($column.list && "" != $javaField)
+            <el-table-column label="${comment}" align="center" prop="${javaField}" />
+          #end
+        #end
+        <el-table-column :label="$t('common.action')" align="center">
+          <template #default="scope" width="150">
+            <el-button type="primary" @click="openForm(scope.row.${pkColumn.javaField})" v-if="$hasPermission('${moduleName}:${businessName}:edit')">
+              <Icon icon="ep:edit" />
+              {{ $t('action.update') }}
+            </el-button>
+            <el-button type="danger" @click="handleDelete(scope.row.${pkColumn.javaField})" v-if="$hasPermission('${moduleName}:${businessName}:remove')">
+              {{ $t('action.delete') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </tag-controller>
+    </el-table>
+  </ContentWrap>
+  <!-- 添加或修改缓存对话框 -->
+  <${BusinessName}FormSave ref="formRef" @success="handleSearchQuery" />
+</template>
+
+<script lang="ts" setup>
+import type { TagSwitch } from '@/types/table'
+import { getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import * as ${BusinessName}Api from '@/api/${moduleName}/${businessName}'
+import useViewModule from '@/hooks/view-module'
+import { handleTree } from '@/utils/tree'
+import ${BusinessName}FormSave from './form.vue'
+defineOptions({ name: '${BusinessName}' })
+const { t } = useI18n()
+const message = useMessage()
+const showSearch = ref<boolean>(true)
+const columnControllerRef = useTemplateRef('columnControllerRef')
+const queryFormRef = useTemplateRef('queryFormRef')
+const formRef = useTemplateRef('formRef')
+
+const { viewModel, handleQuery, handleResetQuery, handleSearchQuery, handleDelete } = useViewModule({
+  requestQuery: ${BusinessName}Api.query${BusinessName}List,
+  requestDelete: ${BusinessName}Api.delete${BusinessName},
+  queryFormRef
+})
+
+const dataTree = computed(() => handleTree(viewModel.dataList, '${treeCode}', 'children', (e) => e.${treeParentCode}))
+const collapse = ref<boolean>(true)
+const refreshTable = ref<boolean>(true)
+const toggleExpandAll = () => {
+  refreshTable.value = false
+  collapse.value = !collapse.value
+  nextTick(() => {
+    refreshTable.value = true
+  })
+}
+
+const openForm = (${pkColumn.javaField}) => {
+  formRef.value.open(${pkColumn.javaField})
+}
+
+viewModel.dataForm = reactive({
+#foreach($column in $columns)
+  #if($column.query)
+  ${column.javaField}:null,
+  #end
+#end
+})
+</script>

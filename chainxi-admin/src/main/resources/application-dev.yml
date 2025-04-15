@@ -1,0 +1,17 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+  datasource:
+    druid:
+      stat-view-servlet:
+        allow:
+logging:
+  level:
+    com.baomidou.example.mapper: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
