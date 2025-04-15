@@ -1,0 +1,107 @@
+package ${packageName}.service.${businessName};
+
+import com.chainxi.common.web.pojo.PageResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ${packageName}.domain.${businessName}.${ClassName};
+import ${packageName}.convert.${businessName}.${ClassName}Convert;
+import ${packageName}.mapper.${businessName}.${ClassName}Mapper;
+import ${packageName}.reqvo.${businessName}.${QueryReqClassName};
+import ${packageName}.reqvo.${businessName}.${ClassName}CreateReqVo;
+import ${packageName}.reqvo.${businessName}.${ClassName}UpdateReqVo;
+import ${packageName}.service.${businessName}.I${ClassName}Service;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * ${functionName}Service业务层处理
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Service
+public class ${ClassName}ServiceImpl implements I${ClassName}Service 
+{
+    @Autowired
+    private ${ClassName}Mapper ${className}Mapper;
+
+    /**
+     * 查询${functionName}
+     * 
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return ${functionName}
+     */
+    @Override
+    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return ${className}Mapper.selectById(${pkColumn.javaField});
+    }
+    /**
+     * 查询${functionName}列表
+     * 
+     * @param reqVo ${functionName}
+     * @return ${functionName}
+     */
+    @Override
+    #if($table.crud)
+    public PageResult<${ClassName}> select${ClassName}Page(${QueryReqClassName} reqVo)
+    {
+        return ${className}Mapper.selectPage(reqVo);
+    }
+    #elseif($table.tree)
+    public List<${ClassName}> select${ClassName}List(${QueryReqClassName} reqVo)
+    {
+        return ${className}Mapper.selectList(reqVo);
+    }
+    #end
+
+    /**
+     * 新增${functionName}
+     * 
+     * @param reqVo ${functionName}
+     * @return 结果
+     */
+
+    @Override
+    public int create${ClassName}(${ClassName}CreateReqVo reqVo)
+    {
+        return ${className}Mapper.insert(${ClassName}Convert.INSTANCE.convert2Do(reqVo));
+    }
+
+    /**
+     * 修改${functionName}
+     * 
+     * @param reqVo
+     * @return 结果
+     */
+    @Override
+    public int update${ClassName}(${ClassName}UpdateReqVo reqVo)
+    {
+        return ${className}Mapper.updateById(${ClassName}Convert.INSTANCE.convert2Do(reqVo));
+    }
+
+    /**
+     * 批量删除${functionName}
+     * 
+     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键
+     * @return 结果
+     */
+    @Override
+    public int delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s)
+    {
+        return ${className}Mapper.deleteByIds(Arrays.asList(${pkColumn.javaField}s));
+    }
+
+    /**
+     * 删除${functionName}信息
+     * 
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return 结果
+     */
+    @Override
+    public int delete${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return ${className}Mapper.deleteById(${pkColumn.javaField});
+    }
+}
