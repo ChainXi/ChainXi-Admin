@@ -49,7 +49,7 @@
         <opentelemetry-exporter-jaeger.version>1.34.1</opentelemetry-exporter-jaeger.version>
 
 
-        <druid-spring-boot-starter.version>1.2.24</druid-spring-boot-starter.version>
+        <druid-spring-boot-starter.version>1.2.27</druid-spring-boot-starter.version>
         <redisson.version>3.42.0</redisson.version>
         <springdoc-openapi-ui.version>1.7.0</springdoc-openapi-ui.version>
         <knife4j-openapi3-jakarta-spring-boot-starter.version>4.6.0
