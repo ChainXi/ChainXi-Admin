@@ -28,7 +28,7 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok.version>1.18.30</lombok.version>
 
-        <javafx-controls.version>17</javafx-controls.version>
+        <javafx-controls.version>26-ea+3</javafx-controls.version>
         <spring-boot.version>3.5.0</spring-boot.version>
         <opentelemetry-bom.version>1.49.0</opentelemetry-bom.version>
         <spring-security-oauth2-authorization-server.version>3.4.2</spring-security-oauth2-authorization-server.version>
