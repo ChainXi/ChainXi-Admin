@@ -30,7 +30,7 @@
 
         <javafx-controls.version>17</javafx-controls.version>
         <spring-boot.version>3.5.0</spring-boot.version>
-        <opentelemetry-bom.version>1.49.0</opentelemetry-bom.version>
+        <opentelemetry-bom.version>1.53.0</opentelemetry-bom.version>
         <spring-security-oauth2-authorization-server.version>3.4.2</spring-security-oauth2-authorization-server.version>
         <mybatis-plus-spring-boot3-starter.version>3.5.9</mybatis-plus-spring-boot3-starter.version>
 
