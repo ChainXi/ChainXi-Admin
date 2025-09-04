@@ -32,7 +32,7 @@
         <spring-boot.version>3.5.0</spring-boot.version>
         <opentelemetry-bom.version>1.49.0</opentelemetry-bom.version>
         <spring-security-oauth2-authorization-server.version>3.4.2</spring-security-oauth2-authorization-server.version>
-        <mybatis-plus-spring-boot3-starter.version>3.5.9</mybatis-plus-spring-boot3-starter.version>
+        <mybatis-plus-spring-boot3-starter.version>3.5.14</mybatis-plus-spring-boot3-starter.version>
 
         <mysql-connector-j.version>8.0.31</mysql-connector-j.version>
         <jjwt.version>0.11.2</jjwt.version>
