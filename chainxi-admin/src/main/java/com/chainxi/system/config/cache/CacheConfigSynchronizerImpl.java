@@ -4,11 +4,10 @@ import com.chainxi.system.bo.SysCacheInfoBo;
 import com.chainxi.system.convert.cache.SysCacheInfoConvert;
 import com.chainxi.system.entity.cache.SysCacheInfoDo;
 import com.chainxi.system.mapper.cache.SysCacheInfoMapper;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,44 +30,35 @@ public class CacheConfigSynchronizerImpl implements CacheConfigSynchronizer {
     }
 
     @Override
-    public void sync(@Nonnull String name,
-            @Nonnull List<Cache> currentCaches,
-            List<Integer> defaultConfig) {
+    public void sync(@Nonnull String name, @Nonnull List<MetaCache> currentCaches,
+            List<CacheExpireTime> defaultConfig, Boolean localOnly) {
         SysCacheInfoBo info = getInfo(name);
-        List<Integer> expireTimes;
-        if (info != null) {
+        List<CacheExpireTime> expireTimes;
+        if (info != null && info.getExpireTimes() != null) {
             expireTimes = info.getExpireTimes();
         } else {
             expireTimes = defaultConfig;
         }
-        ArrayList<Cache> caches = new ArrayList<>(currentCaches);
+        ArrayList<MetaCache> caches = new ArrayList<>(currentCaches);
         currentCaches.clear();
-        caches.forEach(Cache::clear);
-        //TBD 对业务上仅非持久化存储数据有影响,是否清除旧的远端缓存?建议另外提供主动清除api
+        caches.forEach(cache -> {
+            if (!localOnly ||
+                    cache.getSource().storageType.equals(StorageCache.StorageType.LOCAL)) {
+                cache
+                        .getRef()
+                        .clear();
+            }
+        });
         for (int i = 0; i < expireTimes.size(); i++) {
-            Integer expireTime = expireTimes.get(i);
+            Integer expireTime = expireTimes
+                    .get(i)
+                    .getExpireTime();
             if (expireTime != -1) {
-                currentCaches.add(builders.get(i).build(name, expireTime));
+                currentCaches.add(builders
+                        .get(i)
+                        .build(name, expireTime));
             }
         }
-
-        /*
-        if (currentCaches.size() >= expireTimes.size() + 1) {
-            List<Cache> caches =
-                    currentCaches.subList(expireTimes.size() + 1, currentCaches.size() + 1);
-            caches.forEach(Cache::clear);
-            caches.clear();
-        }
-        for (int i = 0; i < expireTimes.size(); i++) {
-            Integer expireTime = expireTimes.get(i);
-            if (i == currentCaches.size()) {
-                currentCaches.add(builders.get(i).build(name, expireTime));
-            } else if (i < currentCaches.size()) {
-                //TBD 对业务上仅非持久化存储数据有影响,是否清除旧的远端缓存?建议另外提供主动清除api
-                currentCaches.set(i, builders.get(i).build(name, expireTime));
-            }
-        }
-        */
         log.debug("cacheName:{},currentCaches:{},expireTimes:{}", name, currentCaches, expireTimes);
     }
 }

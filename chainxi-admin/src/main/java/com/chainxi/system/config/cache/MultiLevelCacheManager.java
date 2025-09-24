@@ -4,6 +4,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.*;
 
 /**
@@ -15,22 +16,21 @@ import java.util.*;
 public class MultiLevelCacheManager extends AbstractTransactionSupportingCacheManager {
     private final CacheConfigSynchronizer cacheConfigSynchronizer;
     private final CacheDataChangedBroadcast cacheDataChangedBroadcast;
-    private final Map<String, List<Integer>> initialCacheConfiguration = new LinkedHashMap<>();
+    private final Map<String, List<CacheExpireTime>> initialCacheConfiguration =
+            new LinkedHashMap<>();
     protected boolean allowNullValues = true;
 
     public MultiLevelCacheManager(CacheConfigSynchronizer cacheConfigSynchronizer,
-            CacheDataChangedBroadcast cacheDataChangedBroadcast,
-            Map<String, List<Integer>> initialCacheConfiguration) {
+            CacheDataChangedBroadcast cacheDataChangedBroadcast, Map<String,
+            List<CacheExpireTime>> initialCacheConfiguration) {
         this.cacheConfigSynchronizer   = cacheConfigSynchronizer;
         this.cacheDataChangedBroadcast = cacheDataChangedBroadcast;
         this.initialCacheConfiguration.putAll(initialCacheConfiguration);
     }
 
-    private MultiLevelCache createMultilevelCache(String name, List<Integer> defaultConfig) {
-        return new MultiLevelCache(name,
-                allowNullValues,
-                cacheConfigSynchronizer,
-                defaultConfig,
+    private MultiLevelCache createMultilevelCache(String name,
+            List<CacheExpireTime> defaultConfig) {
+        return new MultiLevelCache(name, allowNullValues, cacheConfigSynchronizer, defaultConfig,
                 cacheDataChangedBroadcast);
     }
 
@@ -43,7 +43,8 @@ public class MultiLevelCacheManager extends AbstractTransactionSupportingCacheMa
     @Override
     protected Collection<? extends Cache> loadCaches() {
         List<Cache> caches = new LinkedList<>();
-        for (Map.Entry<String, List<Integer>> entry : initialCacheConfiguration.entrySet()) {
+        for (Map.Entry<String, List<CacheExpireTime>> entry :
+                initialCacheConfiguration.entrySet()) {
             caches.add(createMultilevelCache(entry.getKey(), entry.getValue()));
         }
         return caches;
@@ -51,6 +52,7 @@ public class MultiLevelCacheManager extends AbstractTransactionSupportingCacheMa
 
     @Override
     protected Cache getMissingCache(@Nonnull String name) {
-        return createMultilevelCache(name, Collections.singletonList(3600000));
+        return createMultilevelCache(name,
+                Collections.singletonList(new CacheExpireTime(StorageCache.REDIS, 3600000)));
     }
 }

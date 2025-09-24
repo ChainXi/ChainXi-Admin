@@ -1,14 +1,18 @@
 package com.chainxi.system.entity.cache;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.chainxi.common.web.pojo.BaseDo;
+import com.chainxi.system.config.cache.CacheExpireTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 缓存信息
@@ -17,7 +21,7 @@ import java.io.Serial;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "sys_cache_info")
+@TableName(value = "sys_cache_info", autoResultMap = true)
 public class SysCacheInfoDo extends BaseDo {
     @Serial
     private static final long serialVersionUID = -1L;
@@ -33,11 +37,8 @@ public class SysCacheInfoDo extends BaseDo {
     /**
      * 过期时间
      */
-    private Integer remoteExpireTime;
-    /**
-     * 本地过期时间
-     */
-    private Integer localExpireTime;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<CacheExpireTime> expireTimes;
     /**
      * 备注
      */

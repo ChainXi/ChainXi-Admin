@@ -1,5 +1,6 @@
 package com.chainxi.system.bo;
 
+import com.chainxi.system.config.cache.CacheExpireTime;
 import lombok.Data;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public class SysCacheInfoBo {
     /**
      * 缓存过期时间
      */
-    private List<Integer> expireTimes;
+    private List<CacheExpireTime> expireTimes;
 }

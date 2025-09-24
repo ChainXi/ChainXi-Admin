@@ -1,8 +1,7 @@
 package com.chainxi.system.config.cache;
 
-import org.springframework.cache.Cache;
-
 import jakarta.annotation.Nonnull;
+
 import java.util.List;
 
 /**
@@ -11,5 +10,5 @@ import java.util.List;
  * @Desc :
  */
 public interface CacheConfigSynchronizer {
-    void sync(@Nonnull String name, @Nonnull List<Cache> list, List<Integer> defaultConfig);
+    void sync(@Nonnull String name, @Nonnull List<MetaCache> list, List<CacheExpireTime> defaultConfig,Boolean localOnly);
 }

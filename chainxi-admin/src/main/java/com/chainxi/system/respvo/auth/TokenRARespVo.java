@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 
 @Schema(description = "管理后台 - 登录 Response VO")
 @NoArgsConstructor
@@ -22,8 +20,5 @@ public class TokenRARespVo {
 
     @Schema(description = "刷新令牌", requiredMode = Schema.RequiredMode.REQUIRED, example = "nice")
     private String refreshToken;
-
-    @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    private LocalDateTime expiresTime;
 
 }

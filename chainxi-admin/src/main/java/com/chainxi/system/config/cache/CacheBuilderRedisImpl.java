@@ -2,7 +2,6 @@ package com.chainxi.system.config.cache;
 
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 
@@ -14,14 +13,14 @@ import java.time.Duration;
  * @Desc :
  */
 @RequiredArgsConstructor
-public class CacheBuilderRedisImpl implements CacheBuilder<RedisCache> {
+public class CacheBuilderRedisImpl implements CacheBuilder {
     private final RedisCacheManager redisCacheManager;
     private final RedisCacheConfiguration defaultCacheConfig;
 
     @Override
-    public RedisCache build(@Nonnull String name, @Nonnull Integer expireTime) {
-        return redisCacheManager.createRedisCache(name,expireTime > 0 ?
+    public MetaCache build(@Nonnull String name, @Nonnull Integer expireTime) {
+        return new MetaCache(redisCacheManager.createRedisCache(name,expireTime > 0 ?
                 defaultCacheConfig.entryTtl(Duration.ofMillis(expireTime)) :
-                defaultCacheConfig);
+                defaultCacheConfig),StorageCache.REDIS);
     }
 }

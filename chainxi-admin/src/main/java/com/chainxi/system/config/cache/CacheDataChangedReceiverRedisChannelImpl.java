@@ -39,7 +39,7 @@ public class CacheDataChangedReceiverRedisChannelImpl implements MessageListener
     public void onConfigChanged(String name) {
         Optional
                 .ofNullable(cacheManager.getCache(name))
-                .ifPresent(MultiLevelCache::syncConfig);
+                .ifPresent(cache -> cache.syncConfig(Boolean.TRUE));
     }
 
     @Override

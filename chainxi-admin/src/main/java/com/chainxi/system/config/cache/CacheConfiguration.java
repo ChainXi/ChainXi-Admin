@@ -1,6 +1,7 @@
 package com.chainxi.system.config.cache;
 
 import com.chainxi.system.constants.system.CacheKeyConstants;
+import com.chainxi.system.constants.system.DefaultValueConstants;
 import com.chainxi.system.mapper.cache.SysCacheInfoMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
-/**
- * @Author : ChainXi
- * @Date : 2024/5/15 1:18
- * @Desc :
- */
 @Configuration
 @EnableCaching
 @RequiredArgsConstructor
@@ -63,17 +56,37 @@ public class CacheConfiguration {
     @Bean
     public MultiLevelCacheManager multiCacheManager(CacheConfigSynchronizer configSynchronizer,
             CacheDataChangedBroadcast dataSynchronizer) {
-        LinkedHashMap<String, List<Integer>> initialCacheConfiguration = new LinkedHashMap<>();
-        initialCacheConfiguration.put(CacheKeyConstants.ENCRYPT,
-                Collections.singletonList(3600000));
-        initialCacheConfiguration.put(CacheKeyConstants.DICT_LABEL, Arrays.asList(-1, 60000));
-        initialCacheConfiguration.put(CacheKeyConstants.DICT_VALUE, Arrays.asList(-1, 60000));
-        initialCacheConfiguration.put(CacheKeyConstants.CAPTCHA_CODE_KEY, Arrays.asList(60000, -1));
-        initialCacheConfiguration.put(CacheKeyConstants.DATA_PERMISSION_TABLE_KEY,
-                Arrays.asList(-1, 600000));
+        Map<String, List<CacheExpireTime>> config = new LinkedHashMap<>();
+        config.put(CacheKeyConstants.ENCRYPT,
+                Collections.singletonList(new CacheExpireTime(StorageCache.REDIS,
+                        DefaultValueConstants.CACHE_ENCRYPT_EXPIRE)));
+        config.put(CacheKeyConstants.DICT_LABEL,
+                Arrays.asList(new CacheExpireTime(StorageCache.CAFFEINE,
+                        DefaultValueConstants.CACHE_DICT_LABEL_LOCAL_EXPIRE),
+                        new CacheExpireTime(StorageCache.REDIS,
+                                DefaultValueConstants.CACHE_DICT_LABEL_REMOTE_EXPIRE)));
+        config.put(CacheKeyConstants.DICT_VALUE,
+                Arrays.asList(new CacheExpireTime(StorageCache.CAFFEINE,
+                        DefaultValueConstants.CACHE_DICT_VALUE_LOCAL_EXPIRE),
+                        new CacheExpireTime(StorageCache.REDIS,
+                                DefaultValueConstants.CACHE_DICT_VALUE_REMOTE_EXPIRE)));
+        config.put(CacheKeyConstants.AUTH_USER,
+                Arrays.asList(new CacheExpireTime(StorageCache.CAFFEINE,
+                        DefaultValueConstants.CACHE_AUTH_USER_LOCAL_EXPIRE),
+                        new CacheExpireTime(StorageCache.REDIS,
+                                DefaultValueConstants.CACHE_AUTH_USER_REMOTE_EXPIRE)));
+        config.put(CacheKeyConstants.CAPTCHA_CODE_KEY,
+                Arrays.asList(new CacheExpireTime(StorageCache.CAFFEINE,
+                        DefaultValueConstants.CACHE_CAPTCHA_CODE_LOCAL_EXPIRE),
+                        new CacheExpireTime(StorageCache.REDIS,
+                                DefaultValueConstants.CACHE_CAPTCHA_CODE_REMOTE_EXPIRE)));
+        config.put(CacheKeyConstants.DATA_PERMISSION_TABLE_KEY,
+                Arrays.asList(new CacheExpireTime(StorageCache.CAFFEINE,
+                        DefaultValueConstants.CACHE_DATA_PERMISSION_TABLE_LOCAL_EXPIRE),
+                        new CacheExpireTime(StorageCache.REDIS,
+                                DefaultValueConstants.CACHE_DATA_PERMISSION_TABLE_REMOTE_EXPIRE)));
 
-        return new MultiLevelCacheManager(configSynchronizer, dataSynchronizer,
-                initialCacheConfiguration);
+        return new MultiLevelCacheManager(configSynchronizer, dataSynchronizer, config);
     }
 
     @Bean

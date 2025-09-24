@@ -1,7 +1,5 @@
 package com.chainxi.system.config.cache;
 
-import org.springframework.cache.Cache;
-
 import jakarta.annotation.Nonnull;
 
 /**
@@ -9,6 +7,6 @@ import jakarta.annotation.Nonnull;
  * @Date : 2024/5/5 22:22
  * @Desc :
  */
-public interface CacheBuilder<T extends Cache> {
-    T build(@Nonnull String name, @Nonnull Integer expireTime);
+public interface CacheBuilder {
+    MetaCache build(@Nonnull String name, @Nonnull Integer expireTime);
 }

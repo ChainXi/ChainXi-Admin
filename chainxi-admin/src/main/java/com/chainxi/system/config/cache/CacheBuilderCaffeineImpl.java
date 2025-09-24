@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.caffeine.CaffeineCache;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -11,13 +12,13 @@ import java.util.concurrent.TimeUnit;
  * @Date : 2024/5/8 3:48
  * @Desc :
  */
-public class CacheBuilderCaffeineImpl implements CacheBuilder<CaffeineCache> {
+public class CacheBuilderCaffeineImpl implements CacheBuilder {
     @Override
-    public CaffeineCache build(@Nonnull String name, @Nonnull Integer expireTime) {
+    public MetaCache build(@Nonnull String name, @Nonnull Integer expireTime) {
         Caffeine<Object, Object> caffeine = Caffeine.newBuilder();
         if (expireTime > 0) {
             caffeine.expireAfterWrite(expireTime, TimeUnit.MILLISECONDS);
         }
-        return new CaffeineCache(name, caffeine.build());
+        return new MetaCache(new CaffeineCache(name, caffeine.build()), StorageCache.CAFFEINE);
     }
 }

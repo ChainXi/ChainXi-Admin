@@ -1,6 +1,9 @@
 package com.chainxi.system.reqvo.cache;
 
+import com.chainxi.system.config.cache.CacheExpireTime;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CacheInfoUpdateReqVo {
@@ -15,11 +18,7 @@ public class CacheInfoUpdateReqVo {
     /**
      * 过期时间
      */
-    private Integer remoteExpireTime;
-    /**
-     * 本地过期时间
-     */
-    private Integer localExpireTime;
+    private List<CacheExpireTime> expireTimes;
     /**
      * 备注
      */

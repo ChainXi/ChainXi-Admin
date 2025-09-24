@@ -5,6 +5,7 @@ import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 
 import jakarta.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +17,9 @@ import java.util.concurrent.Callable;
  * @Desc :
  */
 public class MultiLevelCache extends AbstractValueAdaptingCache {
-    private final List<Cache> caches = new ArrayList<>();
+    private final List<MetaCache> caches = new ArrayList<>();
     private final CacheConfigSynchronizer cacheConfigSynchronizer;
-    private final List<Integer> defaultConfig;
+    public final List<CacheExpireTime> defaultConfig;
     private final CacheDataChangedBroadcast cacheDataChangedBroadcast;
     private final String name;
 
@@ -27,10 +28,8 @@ public class MultiLevelCache extends AbstractValueAdaptingCache {
      *
      * @param allowNullValues whether to allow for {@code null} values
      */
-    protected MultiLevelCache(String name,
-            boolean allowNullValues,
-            CacheConfigSynchronizer cacheConfigSynchronizer,
-            List<Integer> defaultConfig,
+    protected MultiLevelCache(String name, boolean allowNullValues,
+            CacheConfigSynchronizer cacheConfigSynchronizer, List<CacheExpireTime> defaultConfig,
             CacheDataChangedBroadcast cacheDataChangedBroadcast) {
         super(allowNullValues);
         this.name                      = name;
@@ -43,8 +42,13 @@ public class MultiLevelCache extends AbstractValueAdaptingCache {
     @Override
     protected Object lookup(@Nonnull Object key) {
         for (int i = caches.size() - 1; i >= 0; i--) {
-            Cache cache = caches.get(i);
-            Object result = Optional.ofNullable(cache.get(key)).map(ValueWrapper::get).orElse(null);
+            Cache cache = caches
+                    .get(i)
+                    .getRef();
+            Object result = Optional
+                    .ofNullable(cache.get(key))
+                    .map(ValueWrapper::get)
+                    .orElse(null);
             if (result != null) {
                 return result;
             }
@@ -92,33 +96,48 @@ public class MultiLevelCache extends AbstractValueAdaptingCache {
 
     @Override
     public void put(@Nonnull Object key, Object value) {
-        caches.forEach(cache -> cache.put(key, value));
+        caches.forEach(cache -> cache
+                .getRef()
+                .put(key, value));
         cacheDataChangedBroadcast.syncData(getName(), key);
     }
 
     @Override
     public void evict(@Nonnull Object key) {
-        caches.forEach(cache -> cache.evict(key));
+        caches.forEach(cache -> cache
+                .getRef()
+                .evict(key));
         cacheDataChangedBroadcast.syncData(getName(), key);
     }
 
     @Override
     public void clear() {
-        caches.forEach(Cache::clear);
+        caches.forEach(cache -> cache
+                .getRef()
+                .clear());
         cacheDataChangedBroadcast.syncData(getName(), SimpleKey.EMPTY);
     }
 
     public void evictLocal(Object key) {
         for (int i = 1; i < caches.size(); i++) {
             if (key != null) {
-                caches.get(i).evict(key);
+                caches
+                        .get(i)
+                        .getRef()
+                        .evict(key);
             } else {
-                caches.get(i).clear();
+                caches
+                        .get(i)
+                        .getRef()
+                        .clear();
             }
         }
     }
 
     public void syncConfig() {
-        cacheConfigSynchronizer.sync(getName(), caches, defaultConfig);
+        cacheConfigSynchronizer.sync(getName(), caches, defaultConfig, Boolean.FALSE);
+    }
+    public void syncConfig(Boolean localOnly) {
+        cacheConfigSynchronizer.sync(getName(), caches, defaultConfig, localOnly);
     }
 }

@@ -20,6 +20,6 @@ public class TokenAccessRespVo {
     private String accessToken;
 
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    private LocalDateTime expiresTime;
+    private LocalDateTime atExpiresTime;
 
 }

@@ -13,6 +13,7 @@ import com.chainxi.common.web.utils.EncryptUtils;
 import com.chainxi.system.bo.AuthRoleBo;
 import com.chainxi.system.bo.AuthUserBo;
 import com.chainxi.system.constants.system.CacheKeyConstants;
+import com.chainxi.system.constants.system.DefaultValueConstants;
 import com.chainxi.system.convert.auth.SysAuthConvert;
 import com.chainxi.system.convert.auth.SysMenuConvert;
 import com.chainxi.system.convert.auth.SysRoleConvert;
@@ -185,7 +186,8 @@ public class AuthServiceImpl implements AuthService {
                 .map(RefreshTokenDo::getRefreshToken)
                 .toList());
         clientTokens
-                .stream().map(RefreshTokenDo::getAccessToken)
+                .stream()
+                .map(RefreshTokenDo::getAccessToken)
                 .filter(Objects::nonNull)
                 .forEach(tokenStore::removeAccessToken);
         clientTokens
@@ -219,7 +221,7 @@ public class AuthServiceImpl implements AuthService {
                 .setRefreshToken(generateRefreshToken())
                 .setExpiresTime(LocalDateTime
                         .now()
-                        .plusSeconds(7200L));
+                        .plusSeconds(DefaultValueConstants.CONFIG_AUTH_USER_RT_EXPIRE));
         // 创建访问令牌
         setOAuth2AccessToken(refreshToken);
         refreshTokenMapper.insert(refreshToken);
@@ -237,24 +239,24 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RefreshTokenDo refreshToken(String refreshToken) {
         // 查询访问令牌
-        RefreshTokenDo refreshTokenDO = refreshTokenMapper.selectByRefreshToken(refreshToken);
-        if (refreshTokenDO == null) {
+        RefreshTokenDo refreshTokenDo = refreshTokenMapper.selectByRefreshToken(refreshToken);
+        if (refreshTokenDo == null) {
             throw new BizException(GlobalErrorCodeConstants.BAD_REQUEST);
         }
 
-        tokenStore.removeAccessToken(refreshTokenDO.getAccessToken());
+        tokenStore.removeAccessToken(refreshTokenDo.getAccessToken());
 
         // 已过期的情况下，删除刷新令牌
-        if (DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
-            refreshTokenMapper.deleteById(refreshTokenDO.getId());
+        if (DateUtils.isExpired(refreshTokenDo.getExpiresTime())) {
+            refreshTokenMapper.deleteById(refreshTokenDo.getId());
             throw new BizException(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
 
         // 创建访问令牌
-        setOAuth2AccessToken(refreshTokenDO);
-        refreshTokenMapper.updateById(refreshTokenDO);
+        setOAuth2AccessToken(refreshTokenDo);
+        refreshTokenMapper.updateById(refreshTokenDo);
 
-        SysUserDo sysUserDo = sysUserMapper.selectById(refreshTokenDO.getUserId());
+        SysUserDo sysUserDo = sysUserMapper.selectById(refreshTokenDo.getUserId());
         //如果查询不到数据就通过抛出异常来给出提示
         if (Objects.isNull(sysUserDo)) {
             throw new UsernameNotFoundException("用户名或密码错误");
@@ -262,9 +264,9 @@ public class AuthServiceImpl implements AuthService {
         List<AuthRoleBo> rolesByUserId =
                 SysRoleConvert.INSTANCE.convertToAuthRole(sysUserRoleMapper.getRolesByUserId((sysUserDo.getId())));
 
-        tokenStore.setAccessToken(refreshTokenDO.getAccessToken(),
+        tokenStore.setAccessToken(refreshTokenDo.getAccessToken(),
                 SysUserConvert.INSTANCE.convert(sysUserDo, rolesByUserId));
-        return refreshTokenDO;
+        return refreshTokenDo;
     }
 
     @Override
@@ -289,7 +291,7 @@ public class AuthServiceImpl implements AuthService {
                 .setAccessToken(generateAccessToken())
                 .setAtExpiresTime(LocalDateTime
                         .now()
-                        .plusSeconds(3600L));
+                        .plusSeconds(DefaultValueConstants.CONFIG_AUTH_USER_AT_EXPIRE));
     }
 
     private String generateAccessToken() {
