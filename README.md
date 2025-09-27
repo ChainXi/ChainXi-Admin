@@ -1,4 +1,4 @@
-# 🔗 ChainXi-Admin 开源后台管理系统脚手架
+# 🔗 ChainXi-Admin 开源后台管理系统脚手架 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=ChainXi/ChainXi-Admin)
 
 - [中文](/README.md)
 - [English](/README_en.md)

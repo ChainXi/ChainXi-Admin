@@ -1,4 +1,4 @@
-# 🔗 ChainXi-Admin - Open-Source Admin System Scaffold
+# 🔗 ChainXi-Admin - Open-Source Admin System Scaffold ![visitors](https://visitor-badge.laobi.icu/badge?page_id=ChainXi/ChainXi-Admin)
 
 - [中文](/README.md)
 - [English](/README_en.md)
