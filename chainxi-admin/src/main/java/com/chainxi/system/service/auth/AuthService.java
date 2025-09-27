@@ -29,7 +29,7 @@ public interface AuthService {
     @Nullable
     TokenRARespVo login(AuthLoginReqVo authLoginReqVo, Long did);
 
-    Boolean logout(String user);
+    Boolean logout(String uid, String user);
 
     KeyPair queryKeyPair();
 
@@ -53,10 +53,11 @@ public interface AuthService {
      * <p>
      * 参考 DefaultTokenServices 的 refreshAccessToken 方法
      *
+     * @param uid
      * @param refreshToken 刷新令牌
      * @return 访问令牌的信息
      */
-    RefreshTokenDo refreshToken(String refreshToken);
+    RefreshTokenDo refreshToken(String uid, String refreshToken);
 
     /**
      * 移除访问令牌

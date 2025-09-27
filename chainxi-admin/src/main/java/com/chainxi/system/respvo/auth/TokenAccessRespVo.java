@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 
 @Schema(description = "管理后台 - 登录 Response VO")
 @NoArgsConstructor
@@ -18,8 +16,4 @@ public class TokenAccessRespVo {
 
     @Schema(description = "访问令牌", requiredMode = Schema.RequiredMode.REQUIRED, example = "happy")
     private String accessToken;
-
-    @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    private LocalDateTime atExpiresTime;
-
 }

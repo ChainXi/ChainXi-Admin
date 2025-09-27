@@ -44,19 +44,19 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
         String userId = Optional.ofNullable(cookies.get("uid")).map(Cookie::getValue).orElse(null);
         if (!StringUtils.hasText(userId)) {
-            logger.debug("Anonymous access");
+            logger.debug("Anonymous access:null uid");
             filterChain.doFilter(request, response);
             return;
         }
         String token = request.getHeader("access_token");
         if (!StringUtils.hasText(token)) {
-            logger.debug("Anonymous access");
+            logger.debug("Anonymous access:null access_token");
             filterChain.doFilter(request, response);
             return;
         }
         AuthUserBo authUserBo = tokenStore.getAuthUser(token);
         if (authUserBo == null || !authUserBo.getUserId().toString().equals(userId)) {
-            logger.debug("Anonymous access");
+            logger.debug("Anonymous access:invalid authUserBo");
             filterChain.doFilter(request, response);
             return;
         }

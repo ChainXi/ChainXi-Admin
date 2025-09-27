@@ -163,11 +163,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Boolean logout(String accessToken) {
+    public Boolean logout(String uid, String accessToken) {
         RefreshTokenDo refreshTokenDo = refreshTokenMapper.selectByAccessToken(accessToken);
+        Long userId = refreshTokenDo.getUserId();
+        if (Long.parseLong(uid) != userId) {
+            throw new BizException(GlobalErrorCodeConstants.BAD_REQUEST);
+        }
         Long did = refreshTokenDo.getDid();
         Long clientId = refreshTokenDo.getClientId();
-        Long userId = refreshTokenDo.getUserId();
         List<RefreshTokenDo> clientTokens = refreshTokenMapper
                 .selectClient(userId, did)
                 .stream()
@@ -237,13 +240,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public RefreshTokenDo refreshToken(String refreshToken) {
+    public RefreshTokenDo refreshToken(String uid, String refreshToken) {
         // 查询访问令牌
         RefreshTokenDo refreshTokenDo = refreshTokenMapper.selectByRefreshToken(refreshToken);
         if (refreshTokenDo == null) {
             throw new BizException(GlobalErrorCodeConstants.BAD_REQUEST);
         }
-
+        if(refreshTokenDo.getUserId() != Long.parseLong(uid)){
+            throw new BizException(GlobalErrorCodeConstants.BAD_REQUEST);
+        }
         tokenStore.removeAccessToken(refreshTokenDo.getAccessToken());
 
         // 已过期的情况下，删除刷新令牌

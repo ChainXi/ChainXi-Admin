@@ -67,10 +67,15 @@ public class SysAuthController {
         }
     }
 
+    @GetMapping("/ping")
+    public ResponseResult ping() {
+        return ResponseResult.success();
+    }
+
     @PermitAll
     @PostMapping("/login")
-    public ResponseResult login(@CookieValue("did") Long did, @RequestBody AuthLoginReqVo authLoginReqVo,
-            HttpServletResponse response) {
+    public ResponseResult login(@CookieValue("did") Long did,
+            @RequestBody AuthLoginReqVo authLoginReqVo, HttpServletResponse response) {
         PublicKey publicKey = authService
                 .queryKeyPair()
                 .getPublic();
@@ -84,7 +89,7 @@ public class SysAuthController {
                     .error()
                     .setMsg("登录失败");
         }
-        TokenRARespVo login = authService.login(authLoginReqVo,did);
+        TokenRARespVo login = authService.login(authLoginReqVo, did);
         if (login == null) {
             return ResponseResult
                     .error()
@@ -94,6 +99,7 @@ public class SysAuthController {
                 .getUserId()
                 .toString());
         cookie.setPath("/");
+        cookie.setMaxAge(0x25980600);
         response.addCookie(cookie);
         return ResponseResult
                 .success(login)
@@ -104,8 +110,9 @@ public class SysAuthController {
     @PermitAll
     @Operation(summary = "刷新令牌")
     @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
-    public ResponseResult<TokenAccessRespVo> refreshToken(@RequestParam("rt") String refreshToken) {
-        return ResponseResult.success(SysAuthConvert.INSTANCE.convertAT(authService.refreshToken(refreshToken)));
+    public ResponseResult<TokenAccessRespVo> refreshToken(@CookieValue("uid") String uid,
+            @RequestParam("rt") String refreshToken) {
+        return ResponseResult.success(SysAuthConvert.INSTANCE.convertAT(authService.refreshToken(uid, refreshToken)));
     }
 
     @PermitAll
@@ -125,8 +132,9 @@ public class SysAuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseResult logout(@RequestHeader("access_token") String token,@CookieValue("uid") String uid) {
-        if (!authService.logout(token)) {
+    public ResponseResult logout(@RequestHeader("access_token") String token,
+            @CookieValue("uid") String uid) {
+        if (!authService.logout(uid, token)) {
             return ResponseResult
                     .error()
                     .setMsg("登出失败");
